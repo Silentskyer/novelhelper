@@ -29,15 +29,6 @@
 
         <aside class="setup-card">
           <h2>AI 設定</h2>
-          <label for="apiKey">Gemini API Key</label>
-          <input
-            id="apiKey"
-            name="apiKey"
-            type="password"
-            placeholder="貼上你的 Gemini API Key"
-            autocomplete="off"
-          />
-
           <label for="model">模型</label>
           <select id="model" name="model">
             <option value="gemini-2.0-flash">gemini-2.0-flash</option>
@@ -46,7 +37,7 @@
           </select>
 
           <p class="setup-tip">
-            目前版本為前端直連 Gemini。正式上線前建議改為後端代理，避免暴露金鑰。
+            正式版使用 Vercel 環境變數與 Serverless API 代理 Gemini，瀏覽器端不會接觸 API Key。
           </p>
         </aside>
       </header>

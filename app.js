@@ -1,4 +1,3 @@
-const apiKeyInput = document.querySelector("#apiKey");
 const modelSelect = document.querySelector("#model");
 const ideaForm = document.querySelector("#ideaForm");
 const characterForm = document.querySelector("#characterForm");
@@ -8,9 +7,6 @@ const ideaResult = document.querySelector("#ideaResult");
 const characterResult = document.querySelector("#characterResult");
 
 const copyButtons = document.querySelectorAll("[data-copy-target]");
-
-const GEMINI_API_BASE =
-  "https://generativelanguage.googleapis.com/v1beta/models";
 
 function setStatus(element, message, isError = false) {
   element.textContent = message;
@@ -24,55 +20,31 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;");
 }
 
-function getTextFromResponse(data) {
-  const parts = data?.candidates?.[0]?.content?.parts ?? [];
-  return parts
-    .map((part) => part.text || "")
-    .join("\n")
-    .trim();
-}
-
 function renderText(target, text) {
   target.innerHTML = escapeHtml(text);
 }
 
 async function callGemini(prompt) {
-  const apiKey = apiKeyInput.value.trim();
   const model = modelSelect.value;
-
-  if (!apiKey) {
-    throw new Error("請先輸入 Gemini API Key。");
-  }
-
-  const url = `${GEMINI_API_BASE}/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-  const response = await fetch(url, {
+  const response = await fetch("/api/generate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: prompt }],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.95,
-        topP: 0.9,
-        maxOutputTokens: 1200,
-      },
+      prompt,
+      model,
     }),
   });
 
   const data = await response.json();
 
   if (!response.ok) {
-    const message = data?.error?.message || "Gemini 請求失敗。";
+    const message = data?.error || "Gemini 請求失敗。";
     throw new Error(message);
   }
 
-  const output = getTextFromResponse(data);
+  const output = typeof data?.text === "string" ? data.text.trim() : "";
 
   if (!output) {
     throw new Error("AI 沒有回傳內容，請調整條件後再試一次。");

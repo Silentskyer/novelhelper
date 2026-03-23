@@ -48,28 +48,42 @@
 
 ## 目前版本說明
 
-目前版本為純前端靜態網站：
+目前版本為 Vercel 正式部署版：
 
-- 使用者可在頁面輸入 Gemini API Key
 - 可生成小說靈感
 - 可生成角色設計建議
+- 前端透過 `/api/generate` 呼叫伺服器端 API
+- Gemini API Key 僅存在 Vercel 環境變數
 - 支援複製結果
 - 支援回應風格與篇幅設定
+- 有基本安全性驗證與安全標頭
 
 ## 使用方式
 
-直接開啟 `index.html` 即可使用。
+部署到 Vercel 後使用。
 
-若 Gemini 請求失敗，請確認：
+## Vercel 環境變數
 
-- API Key 是否有效
-- Gemini API 是否已在 Google AI Studio 啟用
-- 瀏覽器是否允許對外連線
+請在 Vercel 專案中新增：
+
+- `GEMINI_API_KEY`
+
+新增後重新部署。
+
+## 安全性設計
+
+- 前端不保存也不暴露 Gemini API Key
+- 僅允許白名單模型
+- API 只接受 `POST`
+- API 會驗證輸入格式與長度
+- 回應加入基本安全標頭
+- Gemini 請求由伺服器端轉發
 
 ## 後續建議
 
-下一步建議升級為正式前後端架構，避免在前端直接暴露 API Key，例如：
+可再追加更完整的正式安全機制，例如：
 
-- 前端：Next.js / React
-- 後端：Node.js / Express 或 Next.js API Routes
-- 部署：Vercel / Netlify + Serverless Functions
+- 依 IP 或使用者帳號做 rate limit
+- CAPTCHA 或登入機制
+- 操作歷史儲存
+- 後台用量監控
