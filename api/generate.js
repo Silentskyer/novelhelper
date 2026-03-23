@@ -6,6 +6,8 @@ const ALLOWED_MODELS = new Set([
 ]);
 
 const MAX_PROMPT_LENGTH = 6000;
+const MAX_OUTPUT_TOKENS = 4096;
+const MAX_CONTINUATIONS = 2;
 
 function setSecurityHeaders(res) {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -24,6 +26,35 @@ function getTextFromGemini(data) {
     .map((part) => (typeof part?.text === "string" ? part.text : ""))
     .join("\n")
     .trim();
+}
+
+function getFinishReason(data) {
+  return data?.candidates?.[0]?.finishReason || "";
+}
+
+async function generateContent({ apiKey, model, contents, signal }) {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents,
+        generationConfig: {
+          temperature: 0.95,
+          topP: 0.9,
+          maxOutputTokens: MAX_OUTPUT_TOKENS,
+          responseMimeType: "text/plain",
+        },
+      }),
+      signal,
+    }
+  );
+
+  const data = await response.json();
+  return { response, data };
 }
 
 module.exports = async function handler(req, res) {
@@ -60,46 +91,61 @@ module.exports = async function handler(req, res) {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25000);
+  const timeout = setTimeout(() => controller.abort(), 45000);
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+    const contents = [
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: prompt }],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.95,
-            topP: 0.9,
-            maxOutputTokens: 1200,
-          },
-        }),
+        role: "user",
+        parts: [{ text: prompt }],
+      },
+    ];
+
+    let combinedText = "";
+
+    for (let attempt = 0; attempt <= MAX_CONTINUATIONS; attempt += 1) {
+      const { response, data } = await generateContent({
+        apiKey,
+        model,
+        contents,
         signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const message = data?.error?.message || "Gemini 請求失敗。";
+        return sendError(res, response.status, message);
       }
-    );
 
-    const data = await response.json();
+      const text = getTextFromGemini(data);
+      const finishReason = getFinishReason(data);
 
-    if (!response.ok) {
-      const message = data?.error?.message || "Gemini 請求失敗。";
-      return sendError(res, response.status, message);
+      if (text) {
+        combinedText = combinedText ? `${combinedText}\n\n${text}` : text;
+      }
+
+      if (finishReason !== "MAX_TOKENS" || attempt === MAX_CONTINUATIONS) {
+        break;
+      }
+
+      contents.push({
+        role: "model",
+        parts: [{ text }],
+      });
+      contents.push({
+        role: "user",
+        parts: [
+          {
+            text: "請從上一段最後一句後面繼續，完整補完所有尚未回答的項目。不要重複前文，也不要重新開頭。",
+          },
+        ],
+      });
     }
 
-    const text = getTextFromGemini(data);
-    if (!text) {
+    if (!combinedText) {
       return sendError(res, 502, "AI 沒有回傳內容。");
     }
 
-    return res.status(200).json({ text });
+    return res.status(200).json({ text: combinedText });
   } catch (error) {
     if (error?.name === "AbortError") {
       return sendError(res, 504, "AI 回應逾時，請稍後再試。");
