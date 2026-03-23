@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sabise | 小說靈感生成器</title>
+    <meta
+      name="description"
+      content="使用 Gemini 生成小說靈感與角色設計靈感的創作輔助網站。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Sabise Writing Lab</p>
+          <h1>小說靈感生成器與角色設計輔助</h1>
+          <p class="hero-text">
+            透過 Gemini 協助你快速獲得故事方向、角色設定、衝突設計與創作突破口。
+          </p>
+        </div>
+
+        <aside class="setup-card">
+          <h2>AI 設定</h2>
+          <label for="apiKey">Gemini API Key</label>
+          <input
+            id="apiKey"
+            name="apiKey"
+            type="password"
+            placeholder="貼上你的 Gemini API Key"
+            autocomplete="off"
+          />
+
+          <label for="model">模型</label>
+          <select id="model" name="model">
+            <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+          </select>
+
+          <p class="setup-tip">
+            目前版本為前端直連 Gemini。正式上線前建議改為後端代理，避免暴露金鑰。
+          </p>
+        </aside>
+      </header>
+
+      <main class="content-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-tag">功能一</p>
+              <h2>小說靈感生成器</h2>
+            </div>
+          </div>
+
+          <form id="ideaForm" class="form-grid">
+            <label>
+              類型
+              <input name="genre" type="text" placeholder="奇幻、校園、懸疑、愛情" required />
+            </label>
+
+            <label>
+              主題
+              <input name="theme" type="text" placeholder="救贖、背叛、成長、命運" required />
+            </label>
+
+            <label>
+              故事舞台
+              <input name="setting" type="text" placeholder="蒸氣龐克都市、末日校園、古代王朝" />
+            </label>
+
+            <label>
+              主角類型
+              <input name="protagonist" type="text" placeholder="落魄天才、見習魔法師、失憶特工" />
+            </label>
+
+            <label>
+              篇幅偏好
+              <select name="length">
+                <option value="簡潔">簡潔</option>
+                <option value="中等" selected>中等</option>
+                <option value="豐富">豐富</option>
+              </select>
+            </label>
+
+            <label>
+              風格偏好
+              <select name="tone">
+                <option value="戲劇感">戲劇感</option>
+                <option value="黑暗壓迫">黑暗壓迫</option>
+                <option value="溫柔抒情">溫柔抒情</option>
+                <option value="熱血冒險">熱血冒險</option>
+                <option value="輕鬆幽默">輕鬆幽默</option>
+              </select>
+            </label>
+
+            <label class="full-span">
+              額外需求
+              <textarea
+                name="constraints"
+                rows="4"
+                placeholder="例如：希望包含反轉、雙主角、師徒關係、懸念式開場"
+              ></textarea>
+            </label>
+
+            <div class="actions full-span">
+              <button type="submit" class="primary-btn">生成小說靈感</button>
+            </div>
+          </form>
+
+          <div class="result-card">
+            <div class="result-header">
+              <h3>AI 靈感回應</h3>
+              <button type="button" class="ghost-btn" data-copy-target="ideaResult">複製</button>
+            </div>
+            <div id="ideaStatus" class="status-text">填寫表單後即可生成內容。</div>
+            <article id="ideaResult" class="result-body"></article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-tag">功能二</p>
+              <h2>角色設計輔助</h2>
+            </div>
+          </div>
+
+          <form id="characterForm" class="form-grid">
+            <label>
+              角色定位
+              <input name="role" type="text" placeholder="主角、反派、導師、搭檔" required />
+            </label>
+
+            <label>
+              年齡 / 階段
+              <input name="ageGroup" type="text" placeholder="17歲高中生、30代刑警、千年精靈" />
+            </label>
+
+            <label>
+              世界觀背景
+              <input name="world" type="text" placeholder="末日生存、修仙宗門、現代都市異能" required />
+            </label>
+
+            <label>
+              外在印象
+              <input name="appearance" type="text" placeholder="冷峻寡言、華麗張揚、纖細陰鬱" />
+            </label>
+
+            <label>
+              核心性格
+              <input name="personality" type="text" placeholder="理性偏執、溫柔敏感、野心勃勃" />
+            </label>
+
+            <label>
+              設計深度
+              <select name="depth">
+                <option value="基礎">基礎</option>
+                <option value="完整" selected>完整</option>
+                <option value="深入">深入</option>
+              </select>
+            </label>
+
+            <label class="full-span">
+              角色需求
+              <textarea
+                name="notes"
+                rows="4"
+                placeholder="例如：需要有童年創傷、秘密身份、與主角互補、成長弧明確"
+              ></textarea>
+            </label>
+
+            <div class="actions full-span">
+              <button type="submit" class="primary-btn">生成角色設計</button>
+            </div>
+          </form>
+
+          <div class="result-card">
+            <div class="result-header">
+              <h3>AI 角色建議</h3>
+              <button type="button" class="ghost-btn" data-copy-target="characterResult">複製</button>
+            </div>
+            <div id="characterStatus" class="status-text">可用來生成角色背景、動機與成長線。</div>
+            <article id="characterResult" class="result-body"></article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
