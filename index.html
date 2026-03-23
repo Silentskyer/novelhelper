@@ -183,6 +183,78 @@
             <article id="characterResult" class="result-body"></article>
           </div>
         </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-tag">功能三</p>
+              <h2>角色名字生成器</h2>
+            </div>
+          </div>
+
+          <form id="nameForm" class="form-grid">
+            <label>
+              故事背景
+              <input name="background" type="text" placeholder="仙俠世界、東京異能校園、維多利亞奇幻都市" required />
+            </label>
+
+            <label>
+              性別
+              <select name="gender">
+                <option value="男性">男性</option>
+                <option value="女性">女性</option>
+                <option value="中性">中性</option>
+                <option value="不限" selected>不限</option>
+              </select>
+            </label>
+
+            <label>
+              能力 / 特質
+              <input name="ability" type="text" placeholder="操控火焰、讀心、劍術天才、神官體質" required />
+            </label>
+
+            <label>
+              劇情定位
+              <input name="narrativeRole" type="text" placeholder="主角、反派、導師、宿敵、神秘盟友" required />
+            </label>
+
+            <label>
+              名字風格
+              <input name="vibe" type="text" placeholder="高貴冷冽、危險魅惑、溫柔沉靜、少年感" />
+            </label>
+
+            <label>
+              名字數量
+              <select name="count">
+                <option value="9">約 9 個</option>
+                <option value="10" selected>約 10 個</option>
+                <option value="12">約 12 個</option>
+              </select>
+            </label>
+
+            <label class="full-span">
+              額外要求
+              <textarea
+                name="nameNotes"
+                rows="4"
+                placeholder="例如：希望帶古典感、不要太中二、姓氏要稀有、名字要適合反派"
+              ></textarea>
+            </label>
+
+            <div class="actions full-span">
+              <button type="submit" class="primary-btn">生成角色名字</button>
+            </div>
+          </form>
+
+          <div class="result-card">
+            <div class="result-header">
+              <h3>AI 名字推薦</h3>
+              <button type="button" class="ghost-btn" data-copy-target="nameResult">複製</button>
+            </div>
+            <div id="nameStatus" class="status-text">可依據背景與定位，分成中式、日式、西式提供命名建議。</div>
+            <article id="nameResult" class="result-body"></article>
+          </div>
+        </section>
       </main>
     </div>
 

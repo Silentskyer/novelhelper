@@ -1,10 +1,13 @@
 const modelSelect = document.querySelector("#model");
 const ideaForm = document.querySelector("#ideaForm");
 const characterForm = document.querySelector("#characterForm");
+const nameForm = document.querySelector("#nameForm");
 const ideaStatus = document.querySelector("#ideaStatus");
 const characterStatus = document.querySelector("#characterStatus");
+const nameStatus = document.querySelector("#nameStatus");
 const ideaResult = document.querySelector("#ideaResult");
 const characterResult = document.querySelector("#characterResult");
+const nameResult = document.querySelector("#nameResult");
 
 const copyButtons = document.querySelectorAll("[data-copy-target]");
 
@@ -108,6 +111,31 @@ function buildCharacterPrompt(formData) {
   ].join("\n");
 }
 
+function buildNamePrompt(formData) {
+  return [
+    "你是一位專業小說角色命名顧問，請用繁體中文為角色提供名字建議。",
+    "請根據以下條件，生成適合作為小說角色的命名候選。",
+    "",
+    "角色資訊：",
+    `- 故事背景：${formData.get("background") || "未提供"}`,
+    `- 性別：${formData.get("gender") || "不限"}`,
+    `- 能力 / 特質：${formData.get("ability") || "未提供"}`,
+    `- 劇情定位：${formData.get("narrativeRole") || "未提供"}`,
+    `- 名字風格：${formData.get("vibe") || "未提供"}`,
+    `- 名字數量：${formData.get("count") || "10"}`,
+    `- 額外要求：${formData.get("nameNotes") || "無"}`,
+    "",
+    "請按照以下格式回答：",
+    "1. 中式名字：提供約 3 到 4 個名字，每個名字附一句命名感覺或適合原因。",
+    "2. 日式名字：提供約 3 到 4 個名字，每個名字附一句命名感覺或適合原因。",
+    "3. 西式名字：提供約 3 到 4 個名字，每個名字附一句命名感覺或適合原因。",
+    "",
+    "總數請控制在大約 10 個左右。",
+    "名字要有辨識度、符合背景與角色定位，不要隨機亂取。",
+    "請避免重複風格過高的名字，也不要只列出名字而不說明。"
+  ].join("\n");
+}
+
 function setFormDisabled(form, disabled) {
   for (const element of form.elements) {
     element.disabled = disabled;
@@ -151,6 +179,26 @@ characterForm.addEventListener("submit", async (event) => {
     renderText(characterResult, "");
   } finally {
     setFormDisabled(characterForm, false);
+  }
+});
+
+nameForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(nameForm);
+
+  setFormDisabled(nameForm, true);
+  setStatus(nameStatus, "角色名字生成中，請稍候...");
+  renderText(nameResult, "");
+
+  try {
+    const output = await callGemini(buildNamePrompt(formData));
+    setStatus(nameStatus, "生成完成。");
+    renderText(nameResult, output);
+  } catch (error) {
+    setStatus(nameStatus, error.message, true);
+    renderText(nameResult, "");
+  } finally {
+    setFormDisabled(nameForm, false);
   }
 });
 
